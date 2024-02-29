@@ -196,16 +196,16 @@
             <div class="default-tab">
                 <ul class="nav nav-tabs" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link active" data-toggle="tab" href="#home"><i class="la la-user mr-2"></i> Data Pribadi</a>
+                        <a class="nav-link active" data-toggle="tab" href="#home"><i class="fas fa-user mr-2"></i> Data Pribadi</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#profile"><i class="la la-briefcase mr-2"></i> Kepegawaian</a>
+                        <a class="nav-link" data-toggle="tab" href="#profile"><i class="fas fa-briefcase mr-2"></i> Kepegawaian</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#payroll"><i class="la la-key mr-2"></i> Payroll</a>
+                        <a class="nav-link" data-toggle="tab" href="#payroll"><i class="fas fa-credit-card mr-2"></i> Rekening</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#message"><i class="la la-key mr-2"></i> Akun</a>
+                        <a class="nav-link" data-toggle="tab" href="#message"><i class="fas fa-key mr-2"></i> Akun</a>
                     </li>
                 </ul>
                 <form action="{{route('simpanpegawai')}}" method="post" enctype="multipart/form-data">
