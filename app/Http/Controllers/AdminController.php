@@ -183,13 +183,12 @@ class AdminController extends Controller
                     $query->whereMonth('estimated', '=', "$bulan");
                 });
         })->get();
-        $cuti = Offwork::where(function ($query) use ($bulan, $employee, $tahun) {
+        $cuti = Offwork::where(function ($query) use ($employee, $tahun) {
             $query->where('user_id', $employee->user->id)
-                ->where(function ($query) use ($bulan, $tahun) {
+                ->where(function ($query) use ($tahun) {
                     $query->whereYear('waktu_pengajuan', '=', "$tahun");
-                    $query->whereMonth('waktu_pengajuan', '=', "$bulan");
                 });
-        })->where('status','1')->get();
+        })->where('status','1')->count();
         $groupedCuti = $cuti->mapToGroups(function ($item) {
             $startDate = Carbon::parse($item->waktu_pengajuan)->startOfWeek(Carbon::MONDAY);
             $endDate = Carbon::parse($item->waktu_selesai);
@@ -252,10 +251,23 @@ class AdminController extends Controller
             $payroll->alpha = 6-$count;
             $payroll->status = '1';
             if (!$request->is_active) {
-                $payroll->gaji_total = $request->gaji_pokok;
+                if($cuti > 12){
+                    $hitungcuti = ($cuti - 1) % 12 + 1;
+                    $payroll->gaji_total = $request->gaji_pokok - ($request->gaji_pokok * $hitungcuti);
+                }else{
+                    $payroll->gaji_total = $request->gaji_pokok;
+                }
+                
             } else {
-                $payroll->gaji_total = $request->gaji_pokok + $request->tunjangan;
-                $payroll->tunjangan = $request->tunjangan;
+                if($cuti > 12){
+                    $hitungcuti = ($cuti - 1) % 12 + 1;
+                    $payroll->gaji_total = $request->gaji_pokok + $request->tunjangan - ($request->gaji_pokok * $hitungcuti);
+                    $payroll->tunjangan = $request->tunjangan;
+                }else{
+                    $payroll->gaji_total = $request->gaji_pokok + $request->tunjangan;
+                    $payroll->tunjangan = $request->tunjangan;
+                }
+                
             }
             $payroll->save();
 
