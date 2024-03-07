@@ -189,17 +189,17 @@ class AdminController extends Controller
                     $query->whereYear('waktu_pengajuan', '=', "$tahun");
                 });
         })->where('status','1')->count();
-        $groupedCuti = $cuti->mapToGroups(function ($item) {
-            $startDate = Carbon::parse($item->waktu_pengajuan)->startOfWeek(Carbon::MONDAY);
-            $endDate = Carbon::parse($item->waktu_selesai);
+        // $groupedCuti = $cuti->mapToGroups(function ($item) {
+        //     $startDate = Carbon::parse($item->waktu_pengajuan)->startOfWeek(Carbon::MONDAY);
+        //     $endDate = Carbon::parse($item->waktu_selesai);
         
-            // Jika tanggal selesai melewati akhir minggu, geser tanggal awal ke minggu berikutnya
-            if ($endDate->greaterThan($startDate->copy()->endOfWeek(Carbon::SUNDAY))) {
-                $startDate->addWeek();
-            }
+        //     // Jika tanggal selesai melewati akhir minggu, geser tanggal awal ke minggu berikutnya
+        //     if ($endDate->greaterThan($startDate->copy()->endOfWeek(Carbon::SUNDAY))) {
+        //         $startDate->addWeek();
+        //     }
         
-            return [$startDate->format('Y-m-d') => $item];
-        });
+        //     return [$startDate->format('Y-m-d') => $item];
+        // });
 
         $groupedAbsent = $absent->groupBy(function ($item) {
             return Carbon::parse($item->estimated)->startOfWeek(Carbon::MONDAY)->format('Y-m-d');
@@ -245,30 +245,40 @@ class AdminController extends Controller
             $payroll->waktu_payroll = $request->waktu_payroll;
             $payroll->id_pegawai = $request->id_pegawai;
             $payroll->nama_jabatan = $request->nama_jabatan;
-            $payroll->bpjs = $request->bpjs;
-            $payroll->pajak = $request->pajak;
             $payroll->hadir = $count;
             $payroll->alpha = 6-$count;
             $payroll->status = '1';
-            if (!$request->is_active) {
-                if($cuti > 12){
-                    $hitungcuti = ($cuti - 1) % 12 + 1;
-                    $payroll->gaji_total = $request->gaji_pokok - ($request->gaji_pokok * $hitungcuti);
-                }else{
-                    $payroll->gaji_total = $request->gaji_pokok;
-                }
+            if ($request->is_active) {
                 
-            } else {
-                if($cuti > 12){
-                    $hitungcuti = ($cuti - 1) % 12 + 1;
-                    $payroll->gaji_total = $request->gaji_pokok + $request->tunjangan - ($request->gaji_pokok * $hitungcuti);
-                    $payroll->tunjangan = $request->tunjangan;
+                if($cuti != null){
+                    if($cuti > 12){
+                        $hitungcuti = ($cuti - 1) % 12 + 1;
+                        $payroll->gaji_total = $request->gaji_pokok + $request->tunjangan - ($request->gaji_pokok * $hitungcuti);
+                        $payroll->tunjangan = $request->tunjangan;
+                    }else{
+                        $payroll->gaji_total = $request->gaji_pokok + $request->tunjangan;
+                        $payroll->tunjangan = $request->tunjangan;
+                    }
                 }else{
                     $payroll->gaji_total = $request->gaji_pokok + $request->tunjangan;
                     $payroll->tunjangan = $request->tunjangan;
                 }
                 
+            } else {
+                if($cuti != null){
+                    if($cuti > 12){
+                        $hitungcuti = ($cuti - 1) % 12 + 1;
+                        $payroll->gaji_total = $request->gaji_pokok - ($request->gaji_pokok * $hitungcuti);
+                    }else{
+                        $payroll->gaji_total = $request->gaji_pokok;
+                    }
+
+                }else{
+                    $payroll->gaji_total = $request->gaji_pokok;
+                }
+               
             }
+            // dd($request->is_active);
             $payroll->save();
 
             return redirect('payroll/admin')->with(array(
